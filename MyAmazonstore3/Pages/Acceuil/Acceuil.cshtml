@@ -5,56 +5,8 @@
 }
 @await Component.InvokeAsync("Header")
 
-@* <header class="main-header">
-    <div class="header-container">
-      
-        <div class="logo">
-            <a href="/Acceuil">TimeSpot</a>
-        </div>
-        <div id="search">
-           <form method="get">
-            <div class="search-bar">
-                <input type="text" name="Search" value="@Model.Search"
-                       placeholder="Rechercher des produits par nom..."
-                     />
-                    <button type="submit" >
-                        <i class="fas fa-search"></i>
-                    </button>
-
-            </div>
-        </form>
-        </div>
-        
-        <div class="auth-buttons">
-            <a asp-page="/Acceuil/Panier" class="link2">
-                <i class="fa-solid fa-cart-shopping"> Mon panier</i>
-            </a>
-            <a asp-page="/" class="link1" >
-                Se connecter
-            </a>
-            <a asp-page="/" class="link2">
-                S’inscrire
-            </a>
-        </div>
-    </div>
-    <div class="categories-scroller">
-        @foreach (var cat in Model.Categories)
-        {
-            <a href="/Acceuil/Acceuil?SelectedCategoryId=@cat.CategorieId"
-               class="category-link @(Model.SelectedCategoryId == cat.CategorieId ? "active" : "")">
-                @cat.Nom
-            </a>
-
-        }
-    </div>
-
-</header> *@
-
-
 <div class="container">
 
- 
-    @* <hr class="ligne-mince"> *@
     @if (TempData["Message"] != null)
     {
         <div class="alert alert-success">
@@ -69,7 +21,7 @@
             <i class="fas fa-info-circle"></i>
             Résultats de recherche pour : <strong>@Model.Search</strong>
             (@Model.Produits.Count produit(s) trouvé(s))
-            <a href="/Acceuil" style="margin-left: 15px; color: var(--primary-color);">
+            <a href="/Acceuil/Acceuil" style="margin-left: 15px; color: var(--primary-color);">
                 <i class="fas fa-times"></i> Effacer
             </a>
         </div>
@@ -97,7 +49,7 @@
                         {
                             <span class="badge badge-sale">Promo</span>
                         }
-                        else if (produit.ProduitId % 3 == 0)
+                        else if (produit.ProduitId <=6)
                         {
                             <span class="badge badge-new">Nouveau</span>
                         }

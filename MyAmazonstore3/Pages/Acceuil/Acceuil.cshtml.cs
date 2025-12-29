@@ -35,6 +35,7 @@ namespace MyAmazonstore3.Pages
 
         public async Task<IActionResult> OnGetAsync()
         {
+            
             //Récupérer ou créer PanierId
             PanierId = Request.Cookies["PanierId"];
             if (string.IsNullOrEmpty(PanierId))
@@ -52,7 +53,7 @@ namespace MyAmazonstore3.Pages
 
             //Essayer de récupérer depuis le cache
             if (!_cache.TryGetValue(cacheKey, out List<Produit> produits))
-            {//le TryGetValue test si la cle esiste si  oui on affecte a la table produits le contenu de cle existante sinon on entre pour creer cette table et la stocker ds le cache 
+            {//le TryGetValue test si la cle existe si  oui on affecte a la table produits le contenu de cle existante sinon on entre pour creer cette table et la stocker ds le cache 
 
                 //Pas dans le cache → Requête vers la base de données
                 IQueryable<Produit> query = _context.Produit
@@ -116,3 +117,4 @@ namespace MyAmazonstore3.Pages
         }
     }
 }
+
