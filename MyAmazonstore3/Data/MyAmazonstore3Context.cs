@@ -13,10 +13,8 @@ namespace MyAmazonstore3.Data
             : base(options)
         {
         }
-
         public DbSet<MyAmazonstore3.Models.Produit> Produit { get; set; } = default!;
         public DbSet<MyAmazonstore3.Models.Categorie> Categorie { get; set; } = default!;
-        
         public DbSet<MyAmazonstore3.Models.User> User { get; set; } = default!;
     }
 }

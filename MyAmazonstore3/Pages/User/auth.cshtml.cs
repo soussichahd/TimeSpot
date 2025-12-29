@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Caching.Memory;
 using MyAmazonstore3.Data;
 using MyAmazonstore3.Models;
 using System.ComponentModel.DataAnnotations;
@@ -11,10 +12,12 @@ namespace MyAmazonstore3.Pages.User
     public class authModel : PageModel
     {
         private readonly MyAmazonstore3Context _context;
+        private readonly IMemoryCache _cache; // attribut cache 
 
-        public authModel(MyAmazonstore3Context context)
+        public authModel(MyAmazonstore3Context context, IMemoryCache cache)
         {
             _context = context;
+            _cache = cache; //injection du cache
         }
 
         [BindProperty]
@@ -34,7 +37,7 @@ namespace MyAmazonstore3.Pages.User
 
         public void OnGet()
         {
-            // Rien à faire pour GET
+         
         }
 
         public IActionResult OnPost()
@@ -44,14 +47,25 @@ namespace MyAmazonstore3.Pages.User
                 return Page();
             }
 
-            // Vérifier les informations dans la BDD
-            var user = _context.User
-                .FirstOrDefault(u => u.Email == Input.Email && u.Password == Input.Password);
+            //on vas creer la cle de cache baser sur l email
+            string cacheKey = $"user_login_{Input.Email.ToLower()}";
+
+            // si la cle existe on vas recuperer la ligne ds user sinon on vas chercher l utilisateur et l enregisterer ds le cache 
+            if (!_cache.TryGetValue(cacheKey, out Models.User user))
+            {  
+                user = _context.User
+                    .FirstOrDefault(u => u.Email == Input.Email && u.Password == Input.Password);
+
+                if (user != null)
+                {
+                    //stockage de l'utilisateur dans le cache pour 20 minutes
+                    _cache.Set(cacheKey, user, TimeSpan.FromMinutes(20));
+                }
+            }
 
             if (user != null)
             {
-
-                // 2️⃣ Sérialiser l'objet utilisateur (DTO léger recommandé)
+                //creer un objet user pour stocker les information du user dans le cookie
                 var userInfo = new
                 {
                     user.UserId,
@@ -62,20 +76,14 @@ namespace MyAmazonstore3.Pages.User
 
                 string userJson = JsonSerializer.Serialize(userInfo);
 
-                //  Créer le cookie qui contient un JSON avec les infos utilisateur ds le cookie
+                // Cookie utilisateur
                 Response.Cookies.Append("UserCookie", userJson, new CookieOptions
                 {
-                    HttpOnly = true,              // sécurisé côté client
-                    Expires = DateTimeOffset.UtcNow.AddHours(2)  // durée du cookie
+                    HttpOnly = true,               // sécurité : inaccessible en JS
+                    Expires = DateTimeOffset.UtcNow.AddHours(2)
                 });
 
-                // Authentification réussie
-                // Tu peux ici créer une session ou cookie si besoin
-                // Exemple : HttpContext.Session.SetString("UserEmail", user.Email);
-
-
-       
-                    return RedirectToPage("/Acceuil/Acceuil");
+                return RedirectToPage("/Acceuil/Acceuil");
             }
             else
             {
